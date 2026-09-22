@@ -2,11 +2,11 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import CatalogAdmin from "./pages/CatalogAdmin";
-import Store from "./pages/Store";
+import ErrorBoundary from "./ErrorBoundary";
+import { ThemeProvider } from "./ThemeContext";
+import Home from "./Home";
+import CatalogAdmin from "./CatalogAdmin";
+import Store from "./Store";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
