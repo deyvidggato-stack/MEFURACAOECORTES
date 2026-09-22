@@ -1,0 +1,15 @@
+import { useMemo, useState } from "react";
+import { ArrowLeft, ExternalLink, MessageCircle, ShoppingBag, Zap } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+
+const numbers = ["5515996965635", "5515997780986"];
+const money = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+export default function Store() {
+  const [category, setCategory] = useState<"all" | "product" | "service">("all");
+  const input = useMemo(() => category === "all" ? undefined : { category }, [category]);
+  const query = trpc.catalog.products.useQuery(input);
+  const products = query.data ?? [];
+  const whatsapp = (message: string) => `https://wa.me/${numbers[Math.floor(Math.random() * numbers.length)]}?text=${encodeURIComponent(message)}`;
+  return <div className="store-page"><header className="store-page-header"><a className="store-back" href="/"><ArrowLeft size={17} /> Voltar ao site</a><div className="store-page-brand"><span className="brand-mark">M<span>&</span>E</span><strong>LOJA M&E</strong></div><a className="store-page-contact" href={whatsapp("Olá! Queria saber mais sobre os produtos e serviços.")}><MessageCircle size={16} /> Falar com a equipe</a></header><main className="store-page-main"><div className="store-page-eyebrow"><span /> CATÁLOGO M&E <Zap size={14} /></div><h1>Produtos e serviços<br /><em>para a sua obra.</em></h1><p className="store-page-lede">Encontre equipamentos, soluções e serviços especializados da M&E Furação e Corte em Concreto.</p><div className="store-tabs" role="tablist"><button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>Tudo</button><button className={category === "product" ? "active" : ""} onClick={() => setCategory("product")}>Produtos</button><button className={category === "service" ? "active" : ""} onClick={() => setCategory("service")}>Serviços prestados</button></div>{products.length ? <div className="product-grid">{products.map(item => { const label = item.category === "service" ? "um serviço" : "um produto"; return <article className="product-card" key={item.id}><div className="product-image"><img src={item.imageUrl} alt={item.name} /></div><div className="product-info"><span className="product-tag">{item.category === "service" ? "SERVIÇO PRESTADO" : "PRODUTO DISPONÍVEL"}</span><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}<div className="product-bottom"><strong>{money(item.priceCents)}</strong><a href={whatsapp(`Olá! Tenho interesse em ${label}: ${item.name} (${money(item.priceCents)}).`)}>{item.category === "service" ? "Solicitar serviço" : "Pedir pelo WhatsApp"} <ExternalLink size={14} /></a></div></div></article>; })}</div> : <div className="store-empty"><ShoppingBag size={30} /><strong>{category === "service" ? "Serviços em breve." : category === "product" ? "Produtos em breve." : "Catálogo em breve."}</strong><span>Novos itens serão adicionados pela área de gestão.</span></div>}</main><footer><span>© 2026 M&E Furação e Corte</span><span>Sorocaba - SP</span></footer></div>;
+}
