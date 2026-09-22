@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, Facebook, Headphones, MessageCircle, Send, X } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/trpc";
 
 const TOKEN_KEY = "me_support_chat_token";
 type View = "menu" | "whatsapp" | "online";
@@ -22,6 +22,7 @@ export default function ChatWidget() {
   const [form, setForm] = useState({ username: "", password: "", name: "", email: "", phone: "" });
   const [body, setBody] = useState("");
   const [feedback, setFeedback] = useState("");
+  const oauthSession = trpc.auth.oauthSession.useQuery(undefined, { retry: false });
   const settingsQuery = trpc.catalog.settings.useQuery();
   const settings = settingsQuery.data ?? {};
   const whatsappNumbers = [
@@ -55,6 +56,15 @@ export default function ChatWidget() {
     onError: error => setFeedback(error.message || "Não foi possível enviar a mensagem. Tente novamente."),
   });
   const conversation = conversationQuery.data;
+
+  useEffect(() => {
+    if (oauthSession.data) {
+      localStorage.setItem(TOKEN_KEY, oauthSession.data);
+      setToken(oauthSession.data);
+      setView("online");
+      setFeedback("");
+    }
+  }, [oauthSession.data]);
 
   useEffect(() => {
     if (conversationQuery.error && token) {
@@ -123,7 +133,7 @@ export default function ChatWidget() {
         <div className="support-online-top"><button className="support-back" onClick={resetToMenu}><ArrowLeft size={16} /> Voltar</button></div>
         <form className="support-start" onSubmit={submitAccess}>
           <div className="support-welcome"><Headphones size={30} /><h3>{mode === "login" ? "Entrar no suporte" : "Entrar no atendimento"}</h3><p>Você pode usar uma conta existente ou criar um acesso simples.</p></div>
-          <div className="social-login-info"><strong>Login com Google ou Facebook</strong><span>Os botões abaixo ficam disponíveis quando o login social estiver configurado no servidor.</span><div className="social-login-buttons"><button type="button" className="social-google" onClick={() => setFeedback("O login com Google precisa ser configurado nas credenciais OAuth do servidor.")}>G <span>Continuar com Google</span></button><button type="button" className="social-facebook" onClick={() => setFeedback("O login com Facebook precisa ser configurado nas credenciais OAuth do servidor.")}><Facebook size={17} fill="currentColor" /> <span>Continuar com Facebook</span></button></div></div>
+          <div className="social-login-info"><strong>Login com Google ou Facebook</strong><span>Entre rapidamente usando sua conta Google ou Facebook.</span><div className="social-login-buttons"><button type="button" className="social-google" onClick={() => { window.location.href = "/api/auth/google"; }}>G <span>Continuar com Google</span></button><button type="button" className="social-facebook" onClick={() => { window.location.href = "/api/auth/facebook"; }}><Facebook size={17} fill="currentColor" /> <span>Continuar com Facebook</span></button></div></div>
           <div className="support-divider"><span>ou use o acesso atual</span></div>
           <label>Usuário<input required minLength={3} value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="Seu usuário" /></label>
           <label>Senha<input required minLength={6} type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Sua senha" /></label>
