@@ -4,20 +4,28 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig } from "vite";
 
+const root = path.resolve(import.meta.dirname);
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), jsxLocPlugin()],
   resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-    },
+    alias: [
+      { find: "@shared", replacement: root },
+      { find: "@/_core/hooks", replacement: root },
+      { find: "@/components/ui", replacement: root },
+      { find: "@/components", replacement: root },
+      { find: "@/pages", replacement: root },
+      { find: "@/contexts", replacement: root },
+      { find: "@/lib", replacement: root },
+      { find: "@", replacement: root },
+      { find: "@assets", replacement: path.resolve(root, "attached_assets") },
+    ],
   },
-  envDir: path.resolve(import.meta.dirname),
-  root: path.resolve(import.meta.dirname, "client"),
-  publicDir: path.resolve(import.meta.dirname, "client", "public"),
+  envDir: root,
+  root,
+  publicDir: path.resolve(root, "public"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(root, "dist/public"),
     emptyOutDir: true,
   },
   server: { host: true, allowedHosts: true },
