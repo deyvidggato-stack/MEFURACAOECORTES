@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `panelRole` enum('owner','editor') NOT NULL DEFAULT 'editor';
