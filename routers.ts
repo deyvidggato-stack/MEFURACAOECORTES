@@ -1,11 +1,11 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { ENV } from "./_core/env";
-import { sdk } from "./_core/sdk";
-import { systemRouter } from "./_core/systemRouter";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import { getSessionCookieOptions } from "./cookies";
+import { ENV } from "./env";
+import { sdk } from "./sdk";
+import { systemRouter } from "./systemRouter";
+import { adminProcedure, publicProcedure, router } from "./trpc";
 import { storagePut } from "./storage";
 import { addChatMessage, addAuditLog, addGalleryImage, addProduct, assignChatConversation, closeChatConversation, createChatVisitor, createPanelAccount, getChatConversationByToken, getChatMessages, getChatVisitorByUsername, getPanelAccount, listAllProducts, listAuditLogs, listChatConversations, listGalleryImages, listPanelAccounts, listProducts, listSiteSettings, markPanelLogin, removeGalleryImage, removeProduct, saveSiteSettings, setPanelAccountActive, upsertUser } from "./db";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
