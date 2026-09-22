@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAuth } from "@/useAuth";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Camera, History, ImagePlus, Loader2, LogIn, LogOut, MessageCircle, PackagePlus, Save, Send, Settings, Trash2, Upload, UserPlus, Users } from "lucide-react";
 
