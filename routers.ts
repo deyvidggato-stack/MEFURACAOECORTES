@@ -10,6 +10,8 @@ import { storagePut } from "./storage";
 import { addChatMessage, addAuditLog, addGalleryImage, addProduct, assignChatConversation, closeChatConversation, createChatVisitor, createPanelAccount, getChatConversationByToken, getChatMessages, getChatVisitorByUsername, getPanelAccount, listAllProducts, listAuditLogs, listChatConversations, listGalleryImages, listPanelAccounts, listProducts, listSiteSettings, markPanelLogin, removeGalleryImage, removeProduct, saveSiteSettings, setPanelAccountActive, upsertUser } from "./db";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
+const OAUTH_CHAT_COOKIE = "me_oauth_chat_token";
+
 const uploadSchema = z.object({
   fileName: z.string().min(1).max(180),
   contentType: z.string().regex(/^image\//),
@@ -73,6 +75,12 @@ export const appRouter = router({
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: ONE_YEAR_MS });
       await audit({ ...ctx, user: { openId, name: displayName } }, "login", "painel", `Login realizado como ${panelRole}.`);
       return { success: true } as const;
+    }),
+    oauthSession: publicProcedure.query(({ ctx }) => {
+      const cookies = (ctx.req.headers.cookie || "").split(";").reduce<Record<string, string>>((result, item) => { const [key, ...value] = item.trim().split("="); if (key) result[key] = decodeURIComponent(value.join("=")); return result; }, {});
+      const token = cookies[OAUTH_CHAT_COOKIE];
+      if (token) ctx.res.clearCookie(OAUTH_CHAT_COOKIE, { path: "/", httpOnly: true, sameSite: "lax", secure: ctx.req.protocol === "https" });
+      return token || null;
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
