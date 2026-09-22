@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { AuditLog, ChatMessage, GalleryImage, InsertUser, PanelAccount, Product, SiteSetting, auditLogs, chatConversations, chatMessages, chatVisitors, galleryImages, panelAccounts, products, siteSettings, users } from "./schema";
-import { ENV } from "./_core/env";
+import { ENV } from "./env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
