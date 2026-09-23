@@ -16,7 +16,7 @@ export default defineConfig({
       { find: "@/components", replacement: root },
       { find: "@/pages", replacement: root },
       { find: "@/contexts", replacement: root },
-      { find: "@/lib", replacement: root },
+      { find: "@/lib", replacement: path.resolve(root, "lib") },
       { find: "@", replacement: root },
       { find: "@assets", replacement: path.resolve(root, "attached_assets") },
     ],
