@@ -10,4 +10,5 @@ export const ENV = {
   facebookAppId: process.env.FACEBOOK_APP_ID ?? "",
   facebookAppSecret: process.env.FACEBOOK_APP_SECRET ?? "",
   oauthBaseUrl: process.env.OAUTH_BASE_URL ?? "",
+  openAiApiKey: process.env.OPENAI_API_KEY ?? "",
 };

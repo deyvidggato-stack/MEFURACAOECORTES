@@ -12,6 +12,8 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const OAUTH_CHAT_COOKIE = "me_oauth_chat_token";
 
+const AI_INSTRUCTIONS = `Você é o Assistente Virtual da M&E Furação e Corte em Concreto. Responda sempre em português brasileiro, de forma educada, clara e objetiva. Use somente estas informações: a M&E realiza furação em concreto, corte de concreto, abertura de vãos, corte de pisos e lajes, demolição controlada e furos técnicos para hidráulica, elétrica, gás, ar-condicionado e ancoragens, incluindo vigas, lajes, piscinas e reservatórios. Atende obras residenciais, comerciais e industriais em Sorocaba e região. Endereço: Rua Luiz Gama, 194, Vila Carvalho, Sorocaba/SP, CEP 18060-190. Telefones: (15) 99696-5635 e (15) 99778-0986. E-mail: meservicosconstrucao@gmail.com. O orçamento funciona assim: o cliente envia fotos, medidas, tipo de serviço, espessura aproximada do concreto, cidade e data desejada; a equipe analisa e apresenta uma proposta; após aprovação, a execução é agendada. Não invente preços, horários, prazos, formas de pagamento, disponibilidade, espessuras máximas ou áreas atendidas. Quando faltar informação, diga que a equipe precisa confirmar e convide o cliente a falar pelo WhatsApp https://wa.me/5515996965635. Para orçamento, peça fotos e os dados da obra. Não dê instruções perigosas de execução; recomende avaliação profissional.`;
+
 const uploadSchema = z.object({
   fileName: z.string().min(1).max(180),
   contentType: z.string().regex(/^image\//),
@@ -94,6 +96,22 @@ export const appRouter = router({
     settings: publicProcedure.query(() => listSiteSettings()),
   }),
   chat: router({
+    ai: publicProcedure.input(z.object({ messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(2000) })).min(1).max(20) })).mutation(async ({ input }) => {
+      if (!ENV.openAiApiKey) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "O atendimento IA ainda não foi configurado. Fale conosco pelo WhatsApp." });
+      const response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${ENV.openAiApiKey}` },
+        body: JSON.stringify({ model: "gpt-4o-mini", instructions: AI_INSTRUCTIONS, input: input.messages.map(message => ({ role: message.role, content: message.content })) }),
+      });
+      if (!response.ok) {
+        console.error("[Atendimento IA] OpenAI error", response.status);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Não consegui responder agora. Fale conosco pelo WhatsApp." });
+      }
+      const data = await response.json() as { output_text?: string };
+      const answer = data.output_text?.trim();
+      if (!answer) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Não consegui responder agora. Fale conosco pelo WhatsApp." });
+      return { answer };
+    }),
     start: publicProcedure.input(z.object({ username: z.string().trim().min(3).max(80), password: z.string().min(6).max(120), name: z.string().trim().min(2).max(140), email: z.string().trim().email().optional().or(z.literal("")), phone: z.string().trim().max(40).optional() })).mutation(async ({ input }) => {
       const username = input.username.trim();
       const existing = await getChatVisitorByUsername(username);

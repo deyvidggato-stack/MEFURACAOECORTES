@@ -17,6 +17,7 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
       "@/_core/*": ["./*"],
       "@shared/*": ["./*"],
       "@assets/*": ["./attached_assets/*"]
